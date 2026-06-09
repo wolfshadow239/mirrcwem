@@ -119,7 +119,7 @@ export default function Footer() {
                 Prepared By
               </span>
               <p className="text-sm text-[#edffff]/60 mt-1">
-                RiverFuture Maharashtra Initiative
+                Tushar S Kshirsagar towards RiverFuture Maharashtra Initiative
               </p>
               <p className="text-xs text-[#edffff]/40">
                 Public Infrastructure Vision for Sustainable River Restoration
