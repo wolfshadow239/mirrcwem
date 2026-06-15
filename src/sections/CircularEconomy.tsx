@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
@@ -39,12 +39,39 @@ function ParticleField() {
   const mouseRef = useRef(new THREE.Vector2(0, 0));
   const { viewport } = useThree();
 
-  const particleData = useMemo(() => {
-    const positions = new Float32Array(PARTICLE_COUNT * 3);
-    const colors = new Float32Array(PARTICLE_COUNT * 3);
-    const delays = new Float32Array(PARTICLE_COUNT);
-    const targets = new Int32Array(PARTICLE_COUNT);
-    const phases = new Float32Array(PARTICLE_COUNT);
+  // Initial zeroed arrays for render-safe buffer attachment
+  const initialPositions = new Float32Array(PARTICLE_COUNT * 3)
+  const initialColors = new Float32Array(PARTICLE_COUNT * 3)
+  const initialDelays = new Float32Array(PARTICLE_COUNT)
+  const initialTargets = new Int32Array(PARTICLE_COUNT)
+  const initialPhases = new Float32Array(PARTICLE_COUNT)
+
+  const [particleData] = useState(() => ({
+    positions: initialPositions,
+    colors: initialColors,
+    delays: initialDelays,
+    targets: initialTargets,
+    phases: initialPhases,
+  }))
+
+  // Mutable refs that we will populate and update in effects and frames
+  const positionsRef = useRef(particleData.positions)
+  const baseColorsRef = useRef(initialColors)
+  const displayColorsRef = useRef(initialColors.slice())
+  const delaysRef = useRef(particleData.delays)
+  const targetsRef = useRef(particleData.targets)
+  const phasesRef = useRef(particleData.phases)
+
+  const velocitiesRef = useRef(new Float32Array(PARTICLE_COUNT * 3))
+
+  // Initialize particle data after mount (avoid Math.random during render)
+  useEffect(() => {
+    const positions = positionsRef.current
+    const baseColors = baseColorsRef.current
+    const displayColors = displayColorsRef.current
+    const delays = delaysRef.current
+    const targets = targetsRef.current
+    const phases = phasesRef.current
 
     const colorObj = new THREE.Color();
 
@@ -55,19 +82,30 @@ function ParticleField() {
       positions[i * 3 + 2] = attractor.z + (Math.random() - 0.5) * 0.5;
 
       colorObj.set(COLORS[Math.floor(Math.random() * COLORS.length)]);
-      colors[i * 3] = colorObj.r;
-      colors[i * 3 + 1] = colorObj.g;
-      colors[i * 3 + 2] = colorObj.b;
+      baseColors[i * 3] = colorObj.r;
+      baseColors[i * 3 + 1] = colorObj.g;
+      baseColors[i * 3 + 2] = colorObj.b;
+
+      // Initialize display colors to base values
+      displayColors[i * 3] = baseColors[i * 3];
+      displayColors[i * 3 + 1] = baseColors[i * 3 + 1];
+      displayColors[i * 3 + 2] = baseColors[i * 3 + 2];
 
       delays[i] = Math.random();
       targets[i] = Math.floor(Math.random() * ATTRACTORS.length);
       phases[i] = Math.random() * Math.PI * 2;
     }
 
-    return { positions, colors, delays, targets, phases };
+    // If the points have mounted, update geometry attributes to use our refs
+    if (pointsRef.current) {
+      const posAttr = pointsRef.current.geometry.attributes.position as THREE.BufferAttribute;
+      const colAttr = pointsRef.current.geometry.attributes.color as THREE.BufferAttribute;
+      posAttr.array = positions;
+      colAttr.array = displayColors;
+      posAttr.needsUpdate = true;
+      colAttr.needsUpdate = true;
+    }
   }, []);
-
-  const velocities = useMemo(() => new Float32Array(PARTICLE_COUNT * 3), []);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -81,10 +119,10 @@ function ParticleField() {
   useFrame((state) => {
     if (!pointsRef.current) return;
     const time = state.clock.getElapsedTime();
-    const posAttr = pointsRef.current.geometry.attributes.position;
-    const colAttr = pointsRef.current.geometry.attributes.color;
-    const positions = posAttr.array as Float32Array;
-    const colors = colAttr.array as Float32Array;
+    const posAttr = pointsRef.current.geometry.attributes.position as THREE.BufferAttribute;
+    const colAttr = pointsRef.current.geometry.attributes.color as THREE.BufferAttribute;
+    const positions = positionsRef.current as Float32Array;
+    const colors = displayColorsRef.current as Float32Array;
 
     const mouseWorldX = mouseRef.current.x * viewport.width * 0.5;
     const mouseWorldY = mouseRef.current.y * viewport.height * 0.5;
@@ -93,9 +131,9 @@ function ParticleField() {
 
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const idx = i * 3;
-      const target = ATTRACTORS[particleData.targets[i]];
-      const delay = particleData.delays[i];
-      const phase = particleData.phases[i];
+      const target = ATTRACTORS[targetsRef.current[i]];
+      const delay = delaysRef.current[i];
+      const phase = phasesRef.current[i];
 
       // Orbital motion around target
       const orbitRadius = 0.5 + delay * 1.5;
@@ -115,6 +153,7 @@ function ParticleField() {
 
       // Spring physics
       const spring = 0.02;
+      const velocities = velocitiesRef.current;
       velocities[idx] += (targetX - positions[idx]) * spring;
       velocities[idx + 1] += (targetY - positions[idx + 1]) * spring;
       velocities[idx + 2] += (targetZ - positions[idx + 2]) * spring;
@@ -130,9 +169,9 @@ function ParticleField() {
 
       // Pulse opacity through color intensity
       const pulse = Math.sin(time * 2 + delay * Math.PI * 2) * 0.3 + 0.7;
-      const baseR = particleData.colors[idx];
-      const baseG = particleData.colors[idx + 1];
-      const baseB = particleData.colors[idx + 2];
+      const baseR = baseColorsRef.current[idx];
+      const baseG = baseColorsRef.current[idx + 1];
+      const baseB = baseColorsRef.current[idx + 2];
       colors[idx] = baseR * pulse;
       colors[idx + 1] = baseG * pulse;
       colors[idx + 2] = baseB * pulse;
