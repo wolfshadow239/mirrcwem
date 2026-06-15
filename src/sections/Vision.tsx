@@ -24,8 +24,6 @@ const visionPoints = [
 ];
 
 export default function Vision() {
-  const crisisImage = '/river_pollution.jpg';
-  const restoredImage = '/restored_river.jpg';
   const sectionRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);

@@ -68,7 +68,6 @@ const frameworks = [
 ];
 
 export default function Engineering() {
-  const stpImage = '/stp_facility.jpg';
   const sectionRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
