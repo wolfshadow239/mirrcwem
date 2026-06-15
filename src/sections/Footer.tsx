@@ -82,11 +82,11 @@ export default function Footer() {
               </div>
               <div className="flex items-center gap-2 text-xs text-[#edffff]/40">
                 <Mail className="w-3.5 h-3.5" />
-                <span>contact@riverfuture-mh.in</span>
+                <span>creds.tush@gmail.com</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-[#edffff]/40">
                 <Phone className="w-3.5 h-3.5" />
-                <span>+91 (020) 0000-0000</span>
+                <span>+91 9607397006</span>
               </div>
             </div>
           </div>
@@ -116,7 +116,7 @@ export default function Footer() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-center sm:text-left">
               <span className="text-xs font-mono text-[#edffff]/30 uppercase tracking-widest">
-                Prepared By
+                Prepared By - Tushar S Kshirsagar
               </span>
               <p className="text-sm text-[#edffff]/60 mt-1">
                 RiverFuture Maharashtra Initiative
