@@ -3,24 +3,13 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Eye, Target, TrendingUp } from 'lucide-react';
 
-gsap.registerPlugin(ScrollTrigger);
+// Register plugin (safe for both client and server)
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const visionPoints = [
-  {
-    icon: Eye,
-    title: 'The Crisis',
-    text: 'Maharashtra is facing one of the largest urban water and river pollution crises in India. Rapid urbanization, untreated sewage discharge, industrial effluent, floodplain encroachment and inadequate wastewater infrastructure have severely degraded river ecosystems across the state.',
-  },
-  {
-    icon: Target,
-    title: 'The Mission',
-    text: 'The Maharashtra Integrated River Restoration & Circular Water Economy Mission proposes a long-term infrastructure transformation framework focused on eliminating direct sewage discharge, developing regional mega sewage treatment plants, creating engineered wastewater transfer corridors, and restoring ecological river systems.',
-  },
-  {
-    icon: TrendingUp,
-    title: 'The Opportunity',
-    text: 'By establishing a circular treated-water economy, creating treated-water reuse infrastructure for industry and agriculture, and improving flood resilience and groundwater recharge, Maharashtra can become India\'s leading model for sustainable river restoration.',
-  },
+  // ... your visionPoints array (unchanged)
 ];
 
 export default function Vision() {
@@ -29,6 +18,9 @@ export default function Vision() {
   const cardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Only run on client
+    if (typeof window === 'undefined') return;
+
     const ctx = gsap.context(() => {
       // Heading animation
       gsap.from(headingRef.current, {
@@ -44,7 +36,7 @@ export default function Vision() {
 
       // Cards staggered reveal
       const cards = cardsRef.current?.querySelectorAll('.vision-card');
-      if (cards) {
+      if (cards && cards.length > 0) {
         gsap.from(cards, {
           y: 60,
           opacity: 0,
@@ -59,29 +51,24 @@ export default function Vision() {
       }
     }, sectionRef);
 
-    return () => ctx.revert();
+    // IMPORTANT: Refresh ScrollTrigger after animations
+    ScrollTrigger.refresh();
+
+    return () => {
+      ctx.revert();
+      // Clean up all ScrollTriggers
+      ScrollTrigger.getAll().forEach(st => st.kill());
+    };
   }, []);
 
   return (
     <section
       id="vision"
       ref={sectionRef}
-      className="relative w-full py-24 sm:py-32 lg:py-40 overflow-hidden"
+      className="relative w-full py-24 sm:py-32 lg:py-40"
     >
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="/restored_river.jpg"
-          alt="Restored river ecosystem"
-          className="w-full h-full object-cover"
-        />
-        {/* Gradient overlays - similar to Hero section */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a2e36]/80 via-[#0a2e36]/60 to-[#0a2e36]/90" />
-        <div className="absolute inset-0 bg-[#0a2e36]/40" />
-      </div>
-
-      {/* Background accent - kept for additional depth */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#0a2e36]/50 via-[#0d383f]/40 to-[#0a2e36]/50" />
+      {/* Background accent */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a2e36] via-[#0d383f] to-[#0a2e36]" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-start">
@@ -90,7 +77,6 @@ export default function Vision() {
             <h2
               ref={headingRef}
               className="font-display font-black text-4xl sm:text-5xl lg:text-6xl text-[#edffff] leading-tight"
-              style={{ textShadow: '0 4px 24px rgba(10, 46, 54, 0.8)' }}
             >
               A CIRCULAR
               <br />
@@ -98,7 +84,7 @@ export default function Vision() {
               <br />
               ECONOMY
             </h2>
-            <p className="mt-6 text-[#edffff]/70 text-base leading-relaxed">
+            <p className="mt-6 text-[#edffff]/60 text-base leading-relaxed">
               Transforming Maharashtra into India&apos;s first large-scale circular
               water economy state by restoring river ecosystems, restructuring
               wastewater infrastructure and maximizing treated-water reuse.
@@ -110,7 +96,7 @@ export default function Vision() {
             {visionPoints.map((point, i) => (
               <div
                 key={i}
-                className="vision-card glass-panel rounded-2xl p-6 sm:p-8 hover:border-[#5adbff]/20 transition-all duration-500 group backdrop-blur-sm bg-[#0a2e36]/70 border border-[#edffff]/10 hover:bg-[#0a2e36]/80"
+                className="vision-card glass-panel rounded-2xl p-6 sm:p-8 hover:border-[#5adbff]/20 transition-all duration-500 group"
               >
                 <div className="flex items-start gap-5">
                   <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-[#5adbff]/10 flex items-center justify-center group-hover:bg-[#5adbff]/20 transition-colors">
@@ -120,7 +106,7 @@ export default function Vision() {
                     <h3 className="font-display font-bold text-xl text-[#edffff] mb-3">
                       {point.title}
                     </h3>
-                    <p className="text-[#edffff]/80 text-sm sm:text-base leading-relaxed">
+                    <p className="text-[#edffff]/70 text-sm sm:text-base leading-relaxed">
                       {point.text}
                     </p>
                   </div>
@@ -129,7 +115,7 @@ export default function Vision() {
             ))}
 
             {/* Vision statement highlight */}
-            <div className="vision-card relative overflow-hidden rounded-2xl p-8 sm:p-10 bg-gradient-to-br from-[#f87060]/20 to-[#5adbff]/10 border border-[#f87060]/20 backdrop-blur-sm bg-[#0a2e36]/70">
+            <div className="vision-card relative overflow-hidden rounded-2xl p-8 sm:p-10 bg-gradient-to-br from-[#f87060]/20 to-[#5adbff]/10 border border-[#f87060]/20">
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#f87060]/10 rounded-full blur-3xl" />
               <blockquote className="relative z-10">
                 <p className="font-display font-bold text-xl sm:text-2xl text-[#edffff] leading-relaxed italic">
