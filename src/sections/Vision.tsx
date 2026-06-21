@@ -66,10 +66,22 @@ export default function Vision() {
     <section
       id="vision"
       ref={sectionRef}
-      className="relative w-full py-24 sm:py-32 lg:py-40"
+      className="relative w-full py-24 sm:py-32 lg:py-40 overflow-hidden"
     >
-      {/* Background accent */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0a2e36] via-[#0d383f] to-[#0a2e36]" />
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="/restored_river.jpg"
+          alt="Restored river ecosystem"
+          className="w-full h-full object-cover"
+        />
+        {/* Gradient overlays - similar to Hero section */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a2e36]/80 via-[#0a2e36]/60 to-[#0a2e36]/90" />
+        <div className="absolute inset-0 bg-[#0a2e36]/40" />
+      </div>
+
+      {/* Background accent - kept for additional depth */}
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#0a2e36]/50 via-[#0d383f]/40 to-[#0a2e36]/50" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-start">
@@ -78,6 +90,7 @@ export default function Vision() {
             <h2
               ref={headingRef}
               className="font-display font-black text-4xl sm:text-5xl lg:text-6xl text-[#edffff] leading-tight"
+              style={{ textShadow: '0 4px 24px rgba(10, 46, 54, 0.8)' }}
             >
               A CIRCULAR
               <br />
@@ -85,7 +98,7 @@ export default function Vision() {
               <br />
               ECONOMY
             </h2>
-            <p className="mt-6 text-[#edffff]/60 text-base leading-relaxed">
+            <p className="mt-6 text-[#edffff]/70 text-base leading-relaxed">
               Transforming Maharashtra into India&apos;s first large-scale circular
               water economy state by restoring river ecosystems, restructuring
               wastewater infrastructure and maximizing treated-water reuse.
@@ -97,7 +110,7 @@ export default function Vision() {
             {visionPoints.map((point, i) => (
               <div
                 key={i}
-                className="vision-card glass-panel rounded-2xl p-6 sm:p-8 hover:border-[#5adbff]/20 transition-all duration-500 group"
+                className="vision-card glass-panel rounded-2xl p-6 sm:p-8 hover:border-[#5adbff]/20 transition-all duration-500 group backdrop-blur-sm bg-[#0a2e36]/70 border border-[#edffff]/10 hover:bg-[#0a2e36]/80"
               >
                 <div className="flex items-start gap-5">
                   <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-[#5adbff]/10 flex items-center justify-center group-hover:bg-[#5adbff]/20 transition-colors">
@@ -107,7 +120,7 @@ export default function Vision() {
                     <h3 className="font-display font-bold text-xl text-[#edffff] mb-3">
                       {point.title}
                     </h3>
-                    <p className="text-[#edffff]/70 text-sm sm:text-base leading-relaxed">
+                    <p className="text-[#edffff]/80 text-sm sm:text-base leading-relaxed">
                       {point.text}
                     </p>
                   </div>
@@ -116,7 +129,7 @@ export default function Vision() {
             ))}
 
             {/* Vision statement highlight */}
-            <div className="vision-card relative overflow-hidden rounded-2xl p-8 sm:p-10 bg-gradient-to-br from-[#f87060]/20 to-[#5adbff]/10 border border-[#f87060]/20">
+            <div className="vision-card relative overflow-hidden rounded-2xl p-8 sm:p-10 bg-gradient-to-br from-[#f87060]/20 to-[#5adbff]/10 border border-[#f87060]/20 backdrop-blur-sm bg-[#0a2e36]/70">
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#f87060]/10 rounded-full blur-3xl" />
               <blockquote className="relative z-10">
                 <p className="font-display font-bold text-xl sm:text-2xl text-[#edffff] leading-relaxed italic">
