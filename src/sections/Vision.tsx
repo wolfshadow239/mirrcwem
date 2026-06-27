@@ -1,7 +1,11 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Eye, Target, TrendingUp } from 'lucide-react';
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 type VisionPoint = {
   icon: React.ElementType;
@@ -9,16 +13,11 @@ type VisionPoint = {
   text: string;
 };
 
-// Register plugin (safe for both client and server)
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
-
 const visionPoints: VisionPoint[] = [
   {
     icon: Eye,
     title: 'River Ecosystem Restoration',
-    text: 'Restoring the ecological integrity of Maharashtra\'s rivers by intercepting pollution at source and establishing ecological flow standards across all major basins.',
+    text: "Restoring the ecological integrity of Maharashtra's rivers by intercepting pollution at source and establishing ecological flow standards across all major basins.",
   },
   {
     icon: Target,
@@ -38,7 +37,6 @@ export default function Vision() {
   const cardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Only run on client
     if (typeof window === 'undefined') return;
 
     const ctx = gsap.context(() => {
@@ -57,6 +55,7 @@ export default function Vision() {
       // Cards staggered reveal
       const cards = cardsRef.current?.querySelectorAll('.vision-card');
       if (cards && cards.length > 0) {
+        gsap.set(cards, { opacity: 1, y: 0 }); // always visible fallback
         gsap.from(cards, {
           y: 60,
           opacity: 0,
@@ -65,19 +64,17 @@ export default function Vision() {
           ease: 'power3.out',
           scrollTrigger: {
             trigger: cardsRef.current,
-            start: 'top 80%',
+            start: 'top 95%',
           },
         });
       }
     }, sectionRef);
 
-    // IMPORTANT: Refresh ScrollTrigger after animations
     ScrollTrigger.refresh();
 
     return () => {
       ctx.revert();
-      // Clean up all ScrollTriggers
-      ScrollTrigger.getAll().forEach(st => st.kill());
+      ScrollTrigger.getAll().forEach((st) => st.kill());
     };
   }, []);
 
@@ -87,11 +84,11 @@ export default function Vision() {
       ref={sectionRef}
       className="relative w-full py-24 sm:py-32 lg:py-40"
     >
-      {/* Background accent */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#0a2e36] via-[#0d383f] to-[#0a2e36]" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-start">
+
           {/* Left sticky heading */}
           <div className="lg:col-span-4 lg:sticky lg:top-32">
             <h2
@@ -100,7 +97,7 @@ export default function Vision() {
             >
               A CIRCULAR
               <br />
-              <span className="text-gradient-coral">WATER</span>
+              <span className="text-[#f87060]">WATER</span>
               <br />
               ECONOMY
             </h2>
