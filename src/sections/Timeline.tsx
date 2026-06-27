@@ -86,19 +86,21 @@ export default function Timeline() {
       });
 
       const cards = sectionRef.current?.querySelectorAll('.phase-card');
-      if (cards) {
-        gsap.from(cards, {
-          y: 60,
-          opacity: 0,
-          duration: 1,
-          stagger: 0.2,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: cards[0],
-            start: 'top 80%',
-          },
-        });
-      }
+if (cards) {
+  gsap.set(cards, { opacity: 1, y: 0 }); // ← always visible immediately
+  gsap.from(cards, {
+    y: 60,
+    opacity: 0,
+    duration: 1,
+    stagger: 0.2,
+    ease: 'power3.out',
+    scrollTrigger: {
+      trigger: cards[0],
+      start: 'top 95%', // ← triggers earlier
+    },
+  });
+  ScrollTrigger.refresh(); // ← forces recalculation
+}
     }, sectionRef);
 
     return () => ctx.revert();
