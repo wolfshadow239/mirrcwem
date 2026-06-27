@@ -76,7 +76,7 @@ export default function Timeline() {
     const ctx = gsap.context(() => {
       gsap.from(headingRef.current, {
         y: 40,
-        opacity: 0,
+        opacity: 1,
         duration: 1,
         ease: 'power3.out',
         scrollTrigger: {
