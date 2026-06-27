@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
@@ -16,9 +16,22 @@ import {
   Unlink,
 } from 'lucide-react';
 
-gsap.registerPlugin(ScrollTrigger);
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
-const primaryObjectives = [
+type ObjItem = {
+  icon: React.FC<React.SVGProps<SVGSVGElement>>;
+  text: string;
+};
+
+type ChalItem = {
+  icon: React.FC<React.SVGProps<SVGSVGElement>>;
+  title: string;
+  desc: string;
+};
+
+const primaryObjectives: ObjItem[] = [
   { icon: Shield, text: 'Prevent untreated sewage from entering ecological rivers' },
   { icon: Factory, text: 'Establish regional high-capacity STP infrastructure' },
   { icon: Route, text: 'Develop engineered secondary wastewater corridors' },
@@ -28,7 +41,7 @@ const primaryObjectives = [
   { icon: Users, text: 'Build public participation and environmental awareness' },
 ];
 
-const challenges = [
+const challenges: ChalItem[] = [
   { icon: AlertTriangle, title: 'Untreated Sewage', desc: 'Large volumes of municipal sewage discharged into rivers daily' },
   { icon: Building2, title: 'Industrial Pollution', desc: 'Industrial belts release chemical contaminants into river systems' },
   { icon: MapPinned, title: 'Floodplain Encroachment', desc: 'Urban development has narrowed natural river corridors' },
@@ -43,9 +56,12 @@ export default function Objectives() {
   const chalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const ctx = gsap.context(() => {
       const objCards = objRef.current?.querySelectorAll('.obj-card');
-      if (objCards) {
+      if (objCards && objCards.length > 0) {
+        gsap.set(objCards, { opacity: 1, y: 0 });
         gsap.from(objCards, {
           y: 50,
           opacity: 0,
@@ -54,13 +70,14 @@ export default function Objectives() {
           ease: 'power3.out',
           scrollTrigger: {
             trigger: objRef.current,
-            start: 'top 80%',
+            start: 'top 95%',
           },
         });
       }
 
       const chalCards = chalRef.current?.querySelectorAll('.chal-card');
-      if (chalCards) {
+      if (chalCards && chalCards.length > 0) {
+        gsap.set(chalCards, { opacity: 1, y: 0 });
         gsap.from(chalCards, {
           y: 50,
           opacity: 0,
@@ -69,26 +86,41 @@ export default function Objectives() {
           ease: 'power3.out',
           scrollTrigger: {
             trigger: chalRef.current,
-            start: 'top 80%',
+            start: 'top 95%',
           },
         });
       }
     }, sectionRef);
 
-    return () => ctx.revert();
+    ScrollTrigger.refresh();
+
+    return () => {
+      ctx.revert();
+      ScrollTrigger.getAll().forEach((st) => st.kill());
+    };
   }, []);
 
   return (
     <section
       id="objectives"
       ref={sectionRef}
-      className="relative w-full py-24 sm:py-32"
+      className="relative w-full"
     >
-      <div className="absolute inset-0 bg-[#0a2e36]" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Primary Objectives */}
-        <div className="mb-20">
+      {/* ── PRIMARY OBJECTIVES ── */}
+      <div className="relative w-full py-24 sm:py-32">
+        {/* Background: STP facility image with dark overlay */}
+        <div className="absolute inset-0">
+          <img
+            src="/stp_facility.jpg"
+            alt=""
+            className="w-full h-full object-cover object-center"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a2e36]/95 via-[#0a2e36]/88 to-[#0a2e36]/95" />
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-1 bg-[#5adbff] rounded-full" />
             <span className="text-xs font-mono text-[#5adbff] uppercase tracking-widest">
@@ -97,20 +129,17 @@ export default function Objectives() {
           </div>
           <h2 className="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-[#edffff] mb-12">
             Seven Pillars of
-            <span className="text-gradient-teal"> Transformation</span>
+            <span className="text-[#5adbff]"> Transformation</span>
           </h2>
 
-          <div
-            ref={objRef}
-            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"
-          >
+          <div ref={objRef} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {primaryObjectives.map((obj, i) => (
               <div
                 key={i}
                 className="obj-card glass-panel rounded-xl p-5 flex items-start gap-4 hover:border-[#5adbff]/30 transition-all duration-500 group"
               >
                 <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[#5adbff]/10 flex items-center justify-center group-hover:bg-[#5adbff]/20 group-hover:scale-110 transition-all duration-300">
-                  <obj.icon className="w-5 h-5 text-[#5adbff]" />
+                  {React.createElement(obj.icon, { className: 'w-5 h-5 text-[#5adbff]' })}
                 </div>
                 <p className="text-[#edffff]/80 text-sm leading-relaxed pt-2">
                   {obj.text}
@@ -119,9 +148,22 @@ export default function Objectives() {
             ))}
           </div>
         </div>
+      </div>
 
-        {/* Current Challenges */}
-        <div>
+      {/* ── CURRENT CHALLENGES ── */}
+      <div className="relative w-full py-24 sm:py-32">
+        {/* Background: river pollution image with dark overlay */}
+        <div className="absolute inset-0">
+          <img
+            src="/river_pollution.jpg"
+            alt=""
+            className="w-full h-full object-cover object-center"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a2e36]/95 via-[#1a0a08]/88 to-[#0a2e36]/95" />
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-1 bg-[#f87060] rounded-full" />
             <span className="text-xs font-mono text-[#f87060] uppercase tracking-widest">
@@ -130,13 +172,10 @@ export default function Objectives() {
           </div>
           <h2 className="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-[#edffff] mb-12">
             Major Problems
-            <span className="text-gradient-coral"> Facing Rivers</span>
+            <span className="text-[#f87060]"> Facing Rivers</span>
           </h2>
 
-          <div
-            ref={chalRef}
-            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"
-          >
+          <div ref={chalRef} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {challenges.map((ch, i) => (
               <div
                 key={i}
@@ -145,7 +184,7 @@ export default function Objectives() {
                 <div className="absolute top-0 right-0 w-20 h-20 bg-[#f87060]/5 rounded-full blur-2xl group-hover:bg-[#f87060]/10 transition-all" />
                 <div className="relative z-10">
                   <div className="w-10 h-10 rounded-lg bg-[#f87060]/15 flex items-center justify-center mb-4 group-hover:bg-[#f87060]/25 transition-colors">
-                    <ch.icon className="w-5 h-5 text-[#f87060]" />
+                    {React.createElement(ch.icon, { className: 'w-5 h-5 text-[#f87060]' })}
                   </div>
                   <h3 className="font-display font-bold text-lg text-[#edffff] mb-2">
                     {ch.title}
@@ -159,6 +198,7 @@ export default function Objectives() {
           </div>
         </div>
       </div>
+
     </section>
   );
 }
