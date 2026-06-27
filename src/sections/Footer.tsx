@@ -118,6 +118,12 @@ export default function Footer() {
               <span className="text-xs font-mono text-[#edffff]/30 uppercase tracking-widest">
                 Prepared By - Tushar S Kshirsagar
               </span>
+              <span className="text-xs font-mono text-[#edffff]/30 uppercase tracking-widest">
+                Mob - 9607397006
+              </span>
+              <span className="text-xs font-mono text-[#edffff]/30 uppercase tracking-widest">
+                Email ID - creds.tush@gmail.com
+              </span>
               <p className="text-sm text-[#edffff]/60 mt-1">
                 RiverFuture Maharashtra Initiative
               </p>
