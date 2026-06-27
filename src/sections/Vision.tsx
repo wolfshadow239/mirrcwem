@@ -3,13 +3,33 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Eye, Target, TrendingUp } from 'lucide-react';
 
+type VisionPoint = {
+  icon: React.ElementType;
+  title: string;
+  text: string;
+};
+
 // Register plugin (safe for both client and server)
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-const visionPoints = [
-  // ... your visionPoints array (unchanged)
+const visionPoints: VisionPoint[] = [
+  {
+    icon: Eye,
+    title: 'River Ecosystem Restoration',
+    text: 'Restoring the ecological integrity of Maharashtra\'s rivers by intercepting pollution at source and establishing ecological flow standards across all major basins.',
+  },
+  {
+    icon: Target,
+    title: 'Circular Water Infrastructure',
+    text: 'Restructuring wastewater infrastructure to treat and reuse water at industrial, agricultural, and municipal levels — eliminating dependence on freshwater extraction.',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Statewide Water Economy',
+    text: 'Building a self-sustaining circular water economy that generates revenue, reduces costs, and positions Maharashtra as a national model for water governance.',
+  },
 ];
 
 export default function Vision() {
