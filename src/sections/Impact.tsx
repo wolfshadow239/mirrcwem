@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
@@ -12,7 +12,11 @@ import {
   Users,
 } from 'lucide-react';
 
-gsap.registerPlugin(ScrollTrigger);
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
+
+// ── Types ──────────────────────────────────────────────────────────────────
 
 interface CounterProps {
   end: number;
@@ -22,22 +26,54 @@ interface CounterProps {
   decimals?: number;
 }
 
-function AnimatedCounter({ end, suffix = '', prefix = '', duration = 2.5, decimals = 0 }: CounterProps) {
+type BigStat = {
+  icon: React.FC<React.SVGProps<SVGSVGElement>>;
+  value: number;
+  prefix: string;
+  suffix: string;
+  label: string;
+  sublabel: string;
+  color: string;
+  decimals?: number;
+};
+
+type Benefit = {
+  category: string;
+  icon: React.FC<React.SVGProps<SVGSVGElement>>;
+  color: string;
+  items: string[];
+};
+
+type SmartTech = {
+  icon: React.FC<React.SVGProps<SVGSVGElement>>;
+  name: string;
+  desc: string;
+};
+
+// ── Animated Counter ───────────────────────────────────────────────────────
+
+function AnimatedCounter({
+  end,
+  suffix = '',
+  prefix = '',
+  duration = 2.5,
+  decimals = 0,
+}: CounterProps) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
   const hasAnimated = useRef(false);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     const el = ref.current;
     if (!el) return;
 
     const trigger = ScrollTrigger.create({
       trigger: el,
-      start: 'top 85%',
+      start: 'top 95%',
       onEnter: () => {
         if (hasAnimated.current) return;
         hasAnimated.current = true;
-
         const obj = { val: 0 };
         gsap.to(obj, {
           val: end,
@@ -60,7 +96,9 @@ function AnimatedCounter({ end, suffix = '', prefix = '', duration = 2.5, decima
   );
 }
 
-const bigStats = [
+// ── Data ───────────────────────────────────────────────────────────────────
+
+const bigStats: BigStat[] = [
   {
     icon: IndianRupee,
     value: 3.5,
@@ -91,7 +129,7 @@ const bigStats = [
   },
 ];
 
-const benefits = [
+const benefits: Benefit[] = [
   {
     category: 'River Restoration',
     icon: Waves,
@@ -114,23 +152,36 @@ const benefits = [
     category: 'Economic Benefits',
     icon: TrendingUp,
     color: '#edffff',
-    items: ['Reclaimed water economy', 'Industrial water security', 'Reduced healthcare costs', 'Green infrastructure employment'],
+    items: [
+      'Reclaimed water economy',
+      'Industrial water security',
+      'Reduced healthcare costs',
+      'Green infrastructure employment',
+    ],
   },
 ];
 
-const smartTech = [
+const smartTech: SmartTech[] = [
   { icon: Building2, name: 'AI Pollution Monitoring', desc: 'Real-time river quality analysis' },
   { icon: Waves, name: 'IoT Sensor Networks', desc: 'BOD, COD, pH, flow rates, heavy metals' },
   { icon: CloudSun, name: 'GIS River Dashboard', desc: 'Interactive statewide monitoring' },
   { icon: Users, name: 'Public Transparency Portal', desc: 'Citizen-accessible water quality data' },
 ];
 
+// ── Component ──────────────────────────────────────────────────────────────
+
 export default function Impact() {
   const sectionRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLDivElement>(null);
+  const benefitsRef = useRef<HTMLDivElement>(null);
+  const techRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const ctx = gsap.context(() => {
+      // Heading
+      gsap.set(headingRef.current, { opacity: 1, y: 0 });
       gsap.from(headingRef.current, {
         y: 40,
         opacity: 0,
@@ -138,12 +189,14 @@ export default function Impact() {
         ease: 'power3.out',
         scrollTrigger: {
           trigger: headingRef.current,
-          start: 'top 85%',
+          start: 'top 95%',
         },
       });
 
-      const benefitCards = sectionRef.current?.querySelectorAll('.benefit-card');
-      if (benefitCards) {
+      // Benefit cards
+      const benefitCards = benefitsRef.current?.querySelectorAll('.benefit-card');
+      if (benefitCards && benefitCards.length > 0) {
+        gsap.set(benefitCards, { opacity: 1, y: 0 });
         gsap.from(benefitCards, {
           y: 50,
           opacity: 0,
@@ -151,14 +204,36 @@ export default function Impact() {
           stagger: 0.1,
           ease: 'power3.out',
           scrollTrigger: {
-            trigger: benefitCards[0],
-            start: 'top 80%',
+            trigger: benefitsRef.current,
+            start: 'top 95%',
+          },
+        });
+      }
+
+      // Smart tech cards
+      const techCards = techRef.current?.querySelectorAll('.tech-card');
+      if (techCards && techCards.length > 0) {
+        gsap.set(techCards, { opacity: 1, y: 0 });
+        gsap.from(techCards, {
+          y: 50,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: techRef.current,
+            start: 'top 95%',
           },
         });
       }
     }, sectionRef);
 
-    return () => ctx.revert();
+    ScrollTrigger.refresh();
+
+    return () => {
+      ctx.revert();
+      ScrollTrigger.getAll().forEach((st) => st.kill());
+    };
   }, []);
 
   return (
@@ -170,6 +245,8 @@ export default function Impact() {
       <div className="absolute inset-0 bg-[#0a2e36]" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* ── HEADING ── */}
         <div ref={headingRef} className="text-center mb-16">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="w-8 h-1 bg-[#5adbff] rounded-full" />
@@ -180,7 +257,7 @@ export default function Impact() {
           </div>
           <h2 className="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-[#edffff] mb-4">
             Transformative
-            <span className="text-gradient-teal"> Impact</span>
+            <span className="text-[#5adbff]"> Impact</span>
           </h2>
           <p className="text-[#edffff]/60 max-w-2xl mx-auto">
             Quantified projections and multi-dimensional benefits spanning
@@ -188,7 +265,7 @@ export default function Impact() {
           </p>
         </div>
 
-        {/* Big Counters */}
+        {/* ── BIG COUNTERS ── */}
         <div className="grid sm:grid-cols-3 gap-6 mb-20">
           {bigStats.map((stat, i) => (
             <div
@@ -199,10 +276,10 @@ export default function Impact() {
                 className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5 transition-transform duration-300 group-hover:scale-110"
                 style={{ backgroundColor: `${stat.color}15` }}
               >
-                <stat.icon
-                  className="w-7 h-7"
-                  style={{ color: stat.color }}
-                />
+                {React.createElement(stat.icon, {
+                  className: 'w-7 h-7',
+                  style: { color: stat.color },
+                })}
               </div>
               <div
                 className="text-4xl sm:text-5xl lg:text-6xl mb-2"
@@ -212,7 +289,7 @@ export default function Impact() {
                   end={stat.value}
                   prefix={stat.prefix}
                   suffix={stat.suffix}
-                  decimals={stat.decimals || 0}
+                  decimals={stat.decimals ?? 0}
                 />
               </div>
               <div className="font-display font-semibold text-[#edffff] mb-1">
@@ -223,8 +300,8 @@ export default function Impact() {
           ))}
         </div>
 
-        {/* Benefits Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-20">
+        {/* ── BENEFITS GRID ── */}
+        <div ref={benefitsRef} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-20">
           {benefits.map((benefit, i) => (
             <div
               key={i}
@@ -235,10 +312,10 @@ export default function Impact() {
                 className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
                 style={{ backgroundColor: `${benefit.color}12` }}
               >
-                <benefit.icon
-                  className="w-5 h-5"
-                  style={{ color: benefit.color }}
-                />
+                {React.createElement(benefit.icon, {
+                  className: 'w-5 h-5',
+                  style: { color: benefit.color },
+                })}
               </div>
               <h4 className="font-display font-bold text-[#edffff] mb-3">
                 {benefit.category}
@@ -261,7 +338,7 @@ export default function Impact() {
           ))}
         </div>
 
-        {/* Smart Technology */}
+        {/* ── SMART TECHNOLOGY ── */}
         <div className="glass-panel rounded-3xl p-8 sm:p-10">
           <div className="text-center mb-8">
             <span className="text-xs font-mono text-[#c3e5ae] uppercase tracking-widest">
@@ -272,14 +349,14 @@ export default function Impact() {
             </h3>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div ref={techRef} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {smartTech.map((tech, i) => (
               <div
                 key={i}
-                className="rounded-xl p-5 bg-white/[0.03] hover:bg-white/[0.06] transition-colors group text-center"
+                className="tech-card rounded-xl p-5 bg-white/[0.03] hover:bg-white/[0.06] transition-colors group text-center"
               >
                 <div className="w-12 h-12 rounded-xl bg-[#5adbff]/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-[#5adbff]/20 transition-colors">
-                  <tech.icon className="w-6 h-6 text-[#5adbff]" />
+                  {React.createElement(tech.icon, { className: 'w-6 h-6 text-[#5adbff]' })}
                 </div>
                 <h4 className="font-display font-semibold text-sm text-[#edffff] mb-1">
                   {tech.name}
@@ -289,6 +366,7 @@ export default function Impact() {
             ))}
           </div>
         </div>
+
       </div>
     </section>
   );
