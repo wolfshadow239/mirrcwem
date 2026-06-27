@@ -8,7 +8,7 @@ if (typeof window !== 'undefined') {
 }
 
 type VisionPoint = {
-  icon: React.ElementType;
+  icon: React.FC<React.SVGProps<SVGSVGElement>>;
   title: string;
   text: string;
 };
@@ -117,7 +117,7 @@ export default function Vision() {
               >
                 <div className="flex items-start gap-5">
                   <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-[#5adbff]/10 flex items-center justify-center group-hover:bg-[#5adbff]/20 transition-colors">
-                    <point.icon className="w-6 h-6 text-[#5adbff]" />
+                    {React.createElement(point.icon, { className: 'w-6 h-6 text-[#5adbff]' })}
                   </div>
                   <div>
                     <h3 className="font-display font-bold text-xl text-[#edffff] mb-3">
