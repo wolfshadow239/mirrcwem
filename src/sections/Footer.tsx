@@ -116,7 +116,7 @@ export default function Footer() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-center sm:text-left">
               <span className="text-xs font-mono text-[#edffff]/30 uppercase tracking-widest">
-                Prepared By - Tushar S Kshirsagar Mob - 9607397006 Email id - creds.tush@gmail.com
+                Prepared By - Tushar S Kshirsagar
               </span>
               <p className="text-sm text-[#edffff]/60 mt-1">
                 RiverFuture Maharashtra Initiative
