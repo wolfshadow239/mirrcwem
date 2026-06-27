@@ -84,7 +84,16 @@ export default function Vision() {
       ref={sectionRef}
       className="relative w-full py-24 sm:py-32 lg:py-40"
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0a2e36] via-[#0d383f] to-[#0a2e36]" />
+      {/* Background video-style image with gradient overlay */}
+<div className="absolute inset-0">
+  <img
+    src="/restored_river.jpg"
+    alt=""
+    className="w-full h-full object-cover object-center"
+    loading="lazy"
+  />
+  <div className="absolute inset-0 bg-gradient-to-b from-[#0a2e36]/90 via-[#0d383f]/85 to-[#0a2e36]/90" />
+</div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-start">
