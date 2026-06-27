@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
@@ -19,9 +19,30 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-gsap.registerPlugin(ScrollTrigger);
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
-const fundingSources = [
+type FundingSource = {
+  icon: React.FC<React.SVGProps<SVGSVGElement>>;
+  name: string;
+};
+
+type Benchmark = {
+  country: string;
+  practice: string;
+  icon: React.FC<React.SVGProps<SVGSVGElement>>;
+};
+
+type Risk = {
+  id: number;
+  title: string;
+  icon: React.FC<React.SVGProps<SVGSVGElement>>;
+  color: string;
+  mitigations: string[];
+};
+
+const fundingSources: FundingSource[] = [
   { icon: Landmark, name: 'State Government Funding' },
   { icon: Building, name: 'Central Government Schemes' },
   { icon: Globe, name: 'Multilateral Development Banks' },
@@ -30,7 +51,7 @@ const fundingSources = [
   { icon: Handshake, name: 'Public-Private Partnerships' },
 ];
 
-const benchmarks = [
+const benchmarks: Benchmark[] = [
   { country: 'Singapore', practice: 'Deep sewer tunnel systems', icon: Building2 },
   { country: 'Netherlands', practice: 'Floodplain restoration', icon: Mountain },
   { country: 'Israel', practice: 'Wastewater reuse', icon: Recycle },
@@ -38,7 +59,7 @@ const benchmarks = [
   { country: 'South Korea', practice: 'Urban river restoration', icon: Sparkles },
 ];
 
-const risks = [
+const risks: Risk[] = [
   {
     id: 1,
     title: 'Land Acquisition Delays',
@@ -71,26 +92,72 @@ const risks = [
 
 export default function FundingRisk() {
   const sectionRef = useRef<HTMLElement>(null);
+  const fundingRef = useRef<HTMLDivElement>(null);
+  const benchmarkRef = useRef<HTMLDivElement>(null);
+  const riskRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const ctx = gsap.context(() => {
-      const cards = sectionRef.current?.querySelectorAll('.fr-card');
-      if (cards) {
-        gsap.from(cards, {
+      // Funding cards
+      const fundingCards = fundingRef.current?.querySelectorAll('.funding-card');
+      if (fundingCards && fundingCards.length > 0) {
+        gsap.set(fundingCards, { opacity: 1, y: 0 });
+        gsap.from(fundingCards, {
+          y: 50,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.08,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: fundingRef.current,
+            start: 'top 95%',
+          },
+        });
+      }
+
+      // Benchmark cards
+      const bmCards = benchmarkRef.current?.querySelectorAll('.benchmark-card');
+      if (bmCards && bmCards.length > 0) {
+        gsap.set(bmCards, { opacity: 1, y: 0 });
+        gsap.from(bmCards, {
+          y: 50,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.08,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: benchmarkRef.current,
+            start: 'top 95%',
+          },
+        });
+      }
+
+      // Risk cards
+      const riskCards = riskRef.current?.querySelectorAll('.risk-card');
+      if (riskCards && riskCards.length > 0) {
+        gsap.set(riskCards, { opacity: 1, y: 0 });
+        gsap.from(riskCards, {
           y: 50,
           opacity: 0,
           duration: 0.8,
           stagger: 0.1,
           ease: 'power3.out',
           scrollTrigger: {
-            trigger: cards[0],
-            start: 'top 80%',
+            trigger: riskRef.current,
+            start: 'top 95%',
           },
         });
       }
     }, sectionRef);
 
-    return () => ctx.revert();
+    ScrollTrigger.refresh();
+
+    return () => {
+      ctx.revert();
+      ScrollTrigger.getAll().forEach((st) => st.kill());
+    };
   }, []);
 
   return (
@@ -98,7 +165,8 @@ export default function FundingRisk() {
       <div className="absolute inset-0 bg-gradient-to-b from-[#0a2e36] via-[#0d3a42] to-[#0a2e36]" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Funding Sources */}
+
+        {/* ── FUNDING SOURCES ── */}
         <div className="mb-20">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-1 bg-[#c3e5ae] rounded-full" />
@@ -108,17 +176,17 @@ export default function FundingRisk() {
           </div>
           <h2 className="font-display font-black text-3xl sm:text-4xl text-[#edffff] mb-10">
             Diversified
-            <span className="text-gradient-teal"> Funding Strategy</span>
+            <span className="text-[#5adbff]"> Funding Strategy</span>
           </h2>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div ref={fundingRef} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {fundingSources.map((source, i) => (
               <div
                 key={i}
-                className="fr-card glass-panel rounded-xl p-5 flex items-center gap-4 hover:border-[#c3e5ae]/20 transition-all duration-300 group"
+                className="funding-card glass-panel rounded-xl p-5 flex items-center gap-4 hover:border-[#c3e5ae]/20 transition-all duration-300 group"
               >
                 <div className="w-12 h-12 rounded-xl bg-[#c3e5ae]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#c3e5ae]/20 transition-colors">
-                  <source.icon className="w-6 h-6 text-[#c3e5ae]" />
+                  {React.createElement(source.icon, { className: 'w-6 h-6 text-[#c3e5ae]' })}
                 </div>
                 <span className="text-[#edffff]/80 font-medium text-sm">
                   {source.name}
@@ -128,7 +196,7 @@ export default function FundingRisk() {
           </div>
         </div>
 
-        {/* International Benchmarking */}
+        {/* ── INTERNATIONAL BENCHMARKING ── */}
         <div className="mb-20">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-1 bg-[#5adbff] rounded-full" />
@@ -138,17 +206,17 @@ export default function FundingRisk() {
           </div>
           <h2 className="font-display font-black text-3xl sm:text-4xl text-[#edffff] mb-10">
             Global Best
-            <span className="text-gradient-teal"> Practices</span>
+            <span className="text-[#5adbff]"> Practices</span>
           </h2>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div ref={benchmarkRef} className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {benchmarks.map((bm, i) => (
               <div
                 key={i}
-                className="fr-card glass-panel rounded-2xl p-6 text-center hover:border-[#5adbff]/20 transition-all duration-300 group"
+                className="benchmark-card glass-panel rounded-2xl p-6 text-center hover:border-[#5adbff]/20 transition-all duration-300 group"
               >
                 <div className="w-14 h-14 rounded-2xl bg-[#5adbff]/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-[#5adbff]/20 group-hover:scale-110 transition-all duration-300">
-                  <bm.icon className="w-7 h-7 text-[#5adbff]" />
+                  {React.createElement(bm.icon, { className: 'w-7 h-7 text-[#5adbff]' })}
                 </div>
                 <h4 className="font-display font-bold text-[#edffff] mb-1">
                   {bm.country}
@@ -159,7 +227,7 @@ export default function FundingRisk() {
           </div>
         </div>
 
-        {/* Risk Assessment */}
+        {/* ── RISK ASSESSMENT ── */}
         <div>
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-1 bg-[#f87060] rounded-full" />
@@ -169,14 +237,14 @@ export default function FundingRisk() {
           </div>
           <h2 className="font-display font-black text-3xl sm:text-4xl text-[#edffff] mb-10">
             Risk
-            <span className="text-gradient-coral"> Mitigation</span>
+            <span className="text-[#f87060]"> Mitigation</span>
           </h2>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div ref={riskRef} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {risks.map((risk) => (
               <div
                 key={risk.id}
-                className="fr-card rounded-2xl border p-6 transition-all duration-300 hover:scale-[1.02]"
+                className="risk-card rounded-2xl border p-6 transition-all duration-300 hover:scale-[1.02]"
                 style={{
                   background: `linear-gradient(135deg, ${risk.color}08, transparent)`,
                   borderColor: `${risk.color}20`,
@@ -186,7 +254,10 @@ export default function FundingRisk() {
                   className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
                   style={{ backgroundColor: `${risk.color}15` }}
                 >
-                  <risk.icon className="w-6 h-6" style={{ color: risk.color }} />
+                  {React.createElement(risk.icon, {
+                    className: 'w-6 h-6',
+                    style: { color: risk.color },
+                  })}
                 </div>
                 <h4 className="font-display font-bold text-[#edffff] mb-4">
                   {risk.title}
@@ -217,6 +288,7 @@ export default function FundingRisk() {
             ))}
           </div>
         </div>
+
       </div>
     </section>
   );
